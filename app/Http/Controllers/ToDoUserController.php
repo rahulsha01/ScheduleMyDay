@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\ToDoUser;
 use Illuminate\Http\Request;
 
 class ToDoUserController extends Controller
@@ -23,11 +23,15 @@ class ToDoUserController extends Controller
      */
     public function create(Request $request)
     {
-        $toDoUser = new toDoUser();
-        $toDoUser->username = $request->input('username');
-        $toDoUser->password = $request->input('password');
-        $toDoUser->role = $request->input('role');
-        $toDoUser->email = $request->input('email');
+        $ToDoUser = new ToDoUser();
+        $ToDoUser->u_username = $request->input('u_username');
+        $ToDoUser->u_password = $request->input('u_password');
+        $ToDoUser->u_role = $request->input('u_role');
+        $ToDoUser->u_email = $request->input('u_email');
+
+        $ToDoUser->save();
+
+        return response()->json($ToDoUser);
     }
 
     /**
