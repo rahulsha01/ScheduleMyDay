@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 use App\ToDoUser;
+use Validator;
+use Image;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Crypt;
 
 class ToDoUserController extends Controller
 {
@@ -25,12 +29,40 @@ class ToDoUserController extends Controller
     {
         $ToDoUser = new ToDoUser();
         $ToDoUser->u_username = $request->input('u_username');
-        $ToDoUser->u_password = $request->input('u_password');
+        $ToDoUser->u_password = Crypt::encryptString($request->input('u_password'));
         $ToDoUser->u_role = $request->input('u_role');
         $ToDoUser->u_email = $request->input('u_email');
+        if($request->hasFile('u_image')) {
+            $filenamewithextension = $request->file('u_image')->getClientOriginalName();
 
+            $filename = pathinfo($filenamewithextension, PATHINFO_FILENAME);
+ 
+            //get file extension
+            $extension = $request->file('u_image')->getClientOriginalExtension();
+     
+            //filename to store
+            $filenametostore = $filename.'_'.time().'.'.$extension;
+    
+            $request->file('u_image')->storeAs('public/profile_images', $filenametostore);
+
+            if(!file_exists(public_path('storage/profile_images/crop'))) {
+                mkdir(public_path('storage/profile_images/crop'), 0755);
+            }
+            $profileImage = 'storage/profile_images/'.$filenametostore;
+            $img = Image::make(public_path('storage/profile_images/'.$filenametostore));
+            $croppath = public_path('storage/profile_images/crop/'.$filenametostore);
+
+            $img->resize(80, 80);
+            $img->save($croppath);
+     
+            // you can save crop image path below in database
+            $cropPath = asset('storage/profile_images/crop/'.$filenametostore);
+            $pureImage = asset('storage/profile_images/'.$filenametostore);
+            $ToDoUser->u_image = $pureImage;
+            $ToDoUser->u_thumbnail = $cropPath;
+        }
+        $ToDoUser->u_status = $request->input('u_status');
         $ToDoUser->save();
-
         return response()->json($ToDoUser);
     }
 
@@ -42,7 +74,7 @@ class ToDoUserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+    
     }
 
     /**
@@ -88,5 +120,9 @@ class ToDoUserController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function login(Request $request) {
+
     }
 }

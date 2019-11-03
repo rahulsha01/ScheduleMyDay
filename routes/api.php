@@ -23,6 +23,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 
 Route::post('/register', 'ToDoUserController@create');
+Route::post('/login', 'LoginController@login');
 
 
 
